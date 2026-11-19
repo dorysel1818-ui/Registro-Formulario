@@ -21,7 +21,7 @@ actualizarFecha();
 
 // Pega aquí la URL de tu aplicación web de Apps Script.
 // Debe terminar en /exec, NO es el enlace de Google Sheets.
-const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbzH6WMykjwG5h2PcJCHlwYpPuRwN-Z7fhJOvfKWKsqNLukLY3Zxxjvq2Axmw5q_nKQMcw/exec";
+const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbz_xob_yzb5Qj6X0OsSX3XxuZqjXwANylb4O01CWOiYyygYV6ZJH6YkWjY-lKfEeczy8A/exec";
 
 formulario.addEventListener("submit", function(event) {
     event.preventDefault();
