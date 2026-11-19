@@ -52,21 +52,6 @@ formulario.addEventListener("submit", function(event) {
     boton.textContent = "Enviando...";
     mensaje.textContent = "";
 
-    marcoEnvio.onload = function () {
-        if (!envioEnCurso) {
-            return;
-        }
-
-        window.clearTimeout(temporizadorRespuesta);
-        envioEnCurso = false;
-        mensaje.textContent = "¡Registro enviado correctamente!";
-        mensaje.style.color = "green";
-        formulario.reset();
-        actualizarFecha();
-        boton.disabled = false;
-        boton.textContent = "Enviar registro";
-    };
-
     temporizadorRespuesta = window.setTimeout(function() {
         if (!envioEnCurso) {
             return;
@@ -80,6 +65,37 @@ formulario.addEventListener("submit", function(event) {
         mensaje.style.color = "#b42318";
     }, 30000);
 
-    // Enviar el formulario a Google Apps Script.
-    HTMLFormElement.prototype.submit.call(formulario);
+    const datos = new URLSearchParams({
+        fecha: campoFecha.value,
+        nombre: nombre,
+        correo: correo,
+        telefono: telefono,
+        empresa: empresa
+    });
+
+    fetch(URL_APPS_SCRIPT, {
+        method: "POST",
+        mode: "no-cors",
+        body: datos
+    }).then(function() {
+        if (!envioEnCurso) {
+            return;
+        }
+
+        window.clearTimeout(temporizadorRespuesta);
+        envioEnCurso = false;
+        mensaje.textContent = "¡Registro enviado correctamente!";
+        mensaje.style.color = "green";
+        formulario.reset();
+        actualizarFecha();
+        boton.disabled = false;
+        boton.textContent = "Enviar registro";
+    }).catch(function() {
+        window.clearTimeout(temporizadorRespuesta);
+        envioEnCurso = false;
+        boton.disabled = false;
+        boton.textContent = "Enviar registro";
+        mensaje.textContent = "No se pudo enviar el registro.";
+        mensaje.style.color = "#b42318";
+    });
 });
