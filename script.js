@@ -1,11 +1,14 @@
 
+
 const formulario = document.getElementById("formulario");
 const mensaje = document.getElementById("mensaje");
 const boton = document.getElementById("btnEnviar");
 const marcoEnvio = document.getElementById("marcoEnvio");
 const campoFecha = document.getElementById("fecha");
 let envioEnCurso = false;
+let respuestaRecibida = false;
 let temporizadorRespuesta;
+let temporizadorConfirmacion;
 let temporizadorRecarga;
 
 function actualizarFecha() {
@@ -49,6 +52,7 @@ formulario.addEventListener("submit", function(event) {
     formulario.target = "marcoEnvio";
 
     envioEnCurso = true;
+    respuestaRecibida = false;
     boton.disabled = true;
     boton.textContent = "Enviando...";
     mensaje.textContent = "";
@@ -71,12 +75,24 @@ formulario.addEventListener("submit", function(event) {
 });
 
 marcoEnvio.addEventListener("load", function() {
-    if (!envioEnCurso) {
+    if (!envioEnCurso || respuestaRecibida) {
         return;
     }
 
-    window.clearTimeout(temporizadorRecarga);
-    temporizadorRecarga = window.setTimeout(actualizarFormulario, 1500);
+    window.clearTimeout(temporizadorConfirmacion);
+    temporizadorConfirmacion = window.setTimeout(function() {
+        if (!envioEnCurso || respuestaRecibida) {
+            return;
+        }
+
+        envioEnCurso = false;
+        window.clearTimeout(temporizadorRespuesta);
+        boton.disabled = false;
+        boton.textContent = "Enviar registro";
+        mensaje.textContent =
+            "El servidor no confirmó el guardado. Revise la hoja antes de volver a enviar.";
+        mensaje.style.color = "#b42318";
+    }, 5000);
 });
 
 // Recibir la respuesta de Google Apps Script.
@@ -87,13 +103,16 @@ window.addEventListener("message", function(event) {
         return;
     }
 
+    respuestaRecibida = true;
+    window.clearTimeout(temporizadorRespuesta);
+    window.clearTimeout(temporizadorConfirmacion);
+
     if (resultado.estado === "ok") {
         mensaje.textContent = "¡Registro enviado correctamente!";
         mensaje.style.color = "green";
         window.clearTimeout(temporizadorRecarga);
         temporizadorRecarga = window.setTimeout(actualizarFormulario, 1000);
     } else {
-        window.clearTimeout(temporizadorRespuesta);
         window.clearTimeout(temporizadorRecarga);
         envioEnCurso = false;
         mensaje.textContent = resultado.mensaje || "No se pudo guardar el registro.";
